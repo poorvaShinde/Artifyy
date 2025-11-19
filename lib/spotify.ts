@@ -12,11 +12,10 @@ export interface PlaylistData {
 }
 
 export function extractPlaylistId(input: string): string | null {
-  // Match URL pattern
-  const urlMatch = input.match(/playlist\/([a-zA-Z0-9]+)/);
+  
+  const urlMatch = input.match(/playlist\/([a-zA-Z0-9]+)(\?.*)?/);
   if (urlMatch) return urlMatch[1];
 
-  // Direct ID (22 characters, alphanumeric)
   if (/^[a-zA-Z0-9]{22}$/.test(input.trim())) {
     return input.trim();
   }

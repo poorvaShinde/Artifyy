@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
     const playlist = await fetchPlaylist(
       playlistId,
       session.accessToken

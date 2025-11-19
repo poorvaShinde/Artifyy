@@ -1,9 +1,11 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 
+
 const scopes = [
   "playlist-read-private",
   "playlist-read-collaborative",
+  "user-read-private"
 ].join(" ");
 
 export const authOptions: AuthOptions = {
