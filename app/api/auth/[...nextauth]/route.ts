@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+
+
 import NextAuth, { AuthOptions } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 
@@ -12,7 +15,11 @@ export const authOptions: AuthOptions = {
     SpotifyProvider({
       clientId: process.env.SPOTIFY_CLIENT_ID!,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET!,
-      authorization: `https://accounts.spotify.com/authorize?scope=${scopes}`,
+      authorization: {
+        params: {
+          scope: scopes,
+       },
+      },
     }),
   ],
   callbacks: {
