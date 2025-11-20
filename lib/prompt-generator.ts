@@ -30,9 +30,9 @@ export function generatePrompt(playlist: any): string {
     mood = "calm and peaceful";
     colorPalette = "soft pastels, gentle gradients, soothing blues";
     artStyle = "minimalist, serene";
-  } else if (allText.match(/dark|night|noir|gothic|shadow|deep|midnight|moon|black/)) {
+  } else if (allText.match(/dark|night|noir|gothic|shadow|deep|midnight|moon|black color/)) {
     mood = "dark and mysterious";
-    colorPalette = "deep blacks, dark purples, moody blues";
+    colorPalette = "deep black color, dark purples, moody blues";
     artStyle = "dramatic, cinematic";
   } else if (allText.match(/love|romance|heart|valentine|sweet|kiss|baby|you|together/)) {
     mood = "romantic and warm";
@@ -46,9 +46,9 @@ export function generatePrompt(playlist: any): string {
     mood = "melancholic and introspective";
     colorPalette = "muted blues, grays, subdued tones";
     artStyle = "emotional, atmospheric";
-  } else if (allText.match(/rock|metal|heavy|intense|aggressive|fire|rage|scream/)) {
+  } else if (allText.match(/rock|metal|heavy|intense|aggression|fire|scream/)) {
     mood = "powerful and intense";
-    colorPalette = "bold reds, blacks, metallic tones";
+    colorPalette = "bold reds, metallic tones";
     artStyle = "grungy, raw";
   } else if (allText.match(/summer|beach|tropical|sunny|vacation|island|ocean/)) {
     mood = "bright and uplifting";
@@ -56,7 +56,7 @@ export function generatePrompt(playlist: any): string {
     artStyle = "vibrant, playful";
   } else if (allText.match(/classical|jazz|elegant|sophisticated|piano|violin/)) {
     mood = "sophisticated and timeless";
-    colorPalette = "rich golds, deep burgundies, elegant blacks";
+    colorPalette = "rich golds, deep burgundies, elegant blues";
     artStyle = "refined, artistic";
   }
 
