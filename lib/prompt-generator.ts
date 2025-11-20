@@ -2,7 +2,7 @@ export function generatePrompt(playlist: any): string {
   const name = playlist.name;
   const description = playlist.description || "";
   
-  // Simple mood detection
+//mood detection
   const text = `${name} ${description}`.toLowerCase();
   
   let mood = "vibrant and energetic";

@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
-import OpenAI from "openai";
 import { generatePrompt } from "@/lib/prompt-generator";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { generateImageWithGCP } from "@/lib/google-ai";
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,27 +26,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate AI prompt
+    // Generate AI prompt (keep your existing prompt generator)
     const prompt = generatePrompt(playlist);
 
-    // Generate image
-    const response = await openai.images.generate({
-      model: "gpt-image-1",   // DALL·E 3 replaced by gpt-image-1
-      prompt: prompt,
-      size: "1024x1024",
-      n: 1,
-    });
+    // Generate image with Google Cloud Vertex AI
+    const imageDataUrl = await generateImageWithGCP(prompt);
 
-    const imageUrl = response?.data?.[0]?.url;
-
-    if (!imageUrl) {
+    if (!imageDataUrl) {
       return NextResponse.json(
-        { error: "Failed to generate image: Missing URL" },
+        { error: "Failed to generate image: No image returned" },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ imageUrl, prompt });
+    return NextResponse.json({ imageUrl: imageDataUrl, prompt });
 
   } catch (error: any) {
     console.error("AI Image Error:", error);
