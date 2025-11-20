@@ -8,7 +8,7 @@ import PlaylistInput from "@/components/playlist-input";
 import PlaylistDisplay from "@/components/playlist-display";
 import CoverGenerator from "@/components/cover-generator";
 import Plasma from "@/components/plasma";
-import { FloatingDock } from "@/components/ui/floating-dock";
+import { FloatingDock } from "@/components/ui/floating-dock"; 
 import {
   IconBrandGithub,
   IconBrandSpotify,
@@ -17,24 +17,22 @@ import {
   IconSparkles,
 } from "@tabler/icons-react";
 
+
+
 export default function Home() {
   const { data: session, status } = useSession();
   const [playlist, setPlaylist] = useState<any>(null);
-  const [demoMode, setDemoMode] = useState(false); 
-
   const dockLinks = [
     { title: "Home", icon: <IconHome className="h-full w-full text-neutral-400" />, href: "/" },
     { title: "Spotify", icon: <IconBrandSpotify className="h-full w-full text-neutral-400" />, href: "https://spotify.com" },
     { title: "Features", icon: <IconSparkles className="h-full w-full text-neutral-400" />, href: "#" },
-    { title: "Music", icon: <IconMusic className="h-full w-full text-neutral-400" />, href: "#" },
-    { title: "GitHub", icon: <IconBrandGithub className="h-full w-full text-neutral-400" />, href: "https://github.com" },
+    { title: "GitHub", icon: <IconBrandGithub className="h-full w-full text-neutral-400" />, href: "https://github.com/poorvaShinde/artifyy" },
   ];
-
   if (status === "loading") {
-    return (
-      <div className="flex items-center justify-center min-h-screen relative overflow-hidden bg-black">
-        <FloatingDock items={dockLinks} />
-        <div className="absolute inset-0 w-full h-full">
+  return (
+    <div className="flex items-center justify-center min-h-screen relative overflow-hidden bg-black">
+      <FloatingDock items={dockLinks} /> 
+      <div className="absolute inset-0 w-full h-full">
           <Plasma 
             color="#4f46e5" 
             speed={0.4}
@@ -44,15 +42,16 @@ export default function Home() {
             mouseInteractive={true}
           />
         </div>
+        
         <p className="text-lg relative z-10 text-white">Loading...</p>
       </div>
     );
   }
 
-  if (!session && !demoMode) {
+  if (!session) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-8 relative overflow-hidden bg-black">
-        <FloatingDock items={dockLinks} />
+        <FloatingDock items={dockLinks} /> 
         <div className="absolute inset-0 w-full h-full">
           <Plasma 
             color="#4f46e5" 
@@ -80,34 +79,15 @@ export default function Home() {
                 Sign in with Spotify to get started
               </p>
               <Button 
-                onClick={() => signIn("spotify", { callbackUrl: "/", redirect: true })} 
-                size="lg" 
-                className="w-full"
-              >
-                Sign in with Spotify
-              </Button>
-
-             
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-700" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-gray-900 px-2 text-gray-500">Or</span>
-                </div>
-              </div>
-
-              <Button 
-                onClick={() => setDemoMode(true)} 
-                size="lg" 
-                variant="outline"
-                className="w-full border-gray-700 text-gray-300"
-              >
-                Continue with Demo Mode
-              </Button>
-              <p className="text-xs text-gray-500 mt-2">
-                Demo mode uses a sample playlist. Sign in for full access.
-              </p>
+  onClick={() => signIn("spotify", { 
+    callbackUrl: '/',
+    redirect: true 
+  })} 
+  size="lg" 
+  className="w-full"
+>
+  Sign in with Spotify
+</Button>
             </div>
           </Card>
         </div>
@@ -131,19 +111,10 @@ export default function Home() {
 
       <div className="max-w-4xl mx-auto space-y-8 relative z-10 pt-20">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-white">
-            Playlist Cover Generator {demoMode && <span className="text-sm text-gray-500">(Demo Mode)</span>}
-          </h1>
-          {session && (
-            <Button onClick={() => signOut()} variant="outline" className="border-gray-700 text-gray-300">
-              Sign out
-            </Button>
-          )}
-          {demoMode && (
-            <Button onClick={() => signIn("spotify")} variant="outline" className="border-gray-700 text-gray-300">
-              Sign in with Spotify
-            </Button>
-          )}
+          <h1 className="text-3xl font-bold text-white">Playlist Cover Generator</h1>
+          <Button onClick={() => signOut()} variant="outline" className="border-gray-700 text-gray-300">
+            Sign out
+          </Button>
         </div>
 
         <PlaylistInput onPlaylistLoaded={setPlaylist} />
