@@ -1,7 +1,6 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 
-
 const scopes = [
   "playlist-read-private",
   "playlist-read-collaborative",
@@ -29,11 +28,21 @@ export const authOptions: AuthOptions = {
       session.accessToken = token.accessToken as string;
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
   },
   pages: {
     signIn: "/",
     error: "/",
   },
+  session: {
+    strategy: "jwt",
+  },
+  
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
