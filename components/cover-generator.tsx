@@ -12,6 +12,7 @@ interface CoverGeneratorProps {
 
 export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [prompt, setPrompt] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -19,28 +20,41 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
     if (!imageUrl) return;
 
     try {
+      //data urls directly without API call
+      if (imageUrl.startsWith("data:image")) {
+        // Data URL - download directly
+        const a = document.createElement("a");
+        a.href = imageUrl;
+        a.download = `${playlist.name}_cover.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        //regular URL-API route
         const response = await fetch("/api/download", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
             imageUrl,
-        playlistName: playlist.name,
-        }),
-    });
+            playlistName: playlist.name,
+          }),
+        });
 
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${playlist.name}_cover.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    setError("Download failed");
-  }
-};
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${playlist.name}_cover.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      setError("Download failed");
+    }
+  };
+
   const generateCover = async () => {
     setError("");
     setLoading(true);
@@ -59,6 +73,7 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
       }
 
       setImageUrl(data.imageUrl);
+      setPrompt(data.prompt); 
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -80,7 +95,6 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
           >
             {loading ? "Generating..." : "Generate Cover"}
           </Button>
-          
         ) : (
           <>
             <div className="relative aspect-square w-full max-w-md mx-auto">
@@ -91,52 +105,42 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
                 className="rounded-lg object-cover"
               />
             </div>
-           
-  
+
+            {}
+            {prompt && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-muted-foreground">
+                  AI Prompt Used:
+                </h4>
+                <p className="text-sm p-3 bg-secondary rounded-md text-muted-foreground">
+                  {prompt}
+                </p>
+              </div>
+            )}
 
             <div className="flex gap-2">
               <Button
+                onClick={downloadCover}
+                className="flex-1"
+                size="lg"
+              >
+                Download
+              </Button>
+              <Button
                 onClick={generateCover}
                 disabled={loading}
-                size="lg"
                 variant="outline"
                 className="flex-1"
+                size="lg"
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {loading ? "Generating..." : "Generate Cover"}
                 Regenerate
               </Button>
             </div>
-
-            // Update the buttons section:
-<div className="flex gap-2">
-  <Button
-    onClick={downloadCover}
-    className="flex-1"
-    size="lg"
-  >
-    Download
-  </Button>
-  <Button
-    onClick={generateCover}
-    disabled={loading}
-    variant="outline"
-    className="flex-1"
-  >
-    Regenerate
-  </Button>
-</div>
-
-
           </>
-
-          
-          
         )}
 
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
+        {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
     </Card>
   );

@@ -6,7 +6,6 @@ import { generateImageWithGCP } from "@/lib/google-ai";
 
 export async function POST(request: NextRequest) {
   try {
-    // Check session
     const session = await getServerSession(authOptions);
 
     if (!session) {
@@ -16,7 +15,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse request body
     const { playlist } = await request.json();
 
     if (!playlist) {
@@ -26,7 +24,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate AI prompt (keep your existing prompt generator)
     const prompt = generatePrompt(playlist);
 
     // Generate image with Google Cloud Vertex AI
