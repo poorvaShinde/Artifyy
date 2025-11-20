@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { playlist } = await request.json();
+    const { playlist, customPrompt } = await request.json(); 
 
     if (!playlist) {
       return NextResponse.json(
@@ -24,9 +24,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt = generatePrompt(playlist);
+    const prompt = customPrompt || generatePrompt(playlist); 
 
-    // Generate image with Google Cloud Vertex AI
     const imageDataUrl = await generateImageWithGCP(prompt);
 
     if (!imageDataUrl) {

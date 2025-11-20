@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
 
@@ -13,6 +15,7 @@ interface CoverGeneratorProps {
 export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState<string | null>(null);
+  const [customPrompt, setCustomPrompt] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -20,9 +23,7 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
     if (!imageUrl) return;
 
     try {
-      //data urls directly without API call
       if (imageUrl.startsWith("data:image")) {
-        // Data URL - download directly
         const a = document.createElement("a");
         a.href = imageUrl;
         a.download = `${playlist.name}_cover.png`;
@@ -30,7 +31,6 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
         a.click();
         document.body.removeChild(a);
       } else {
-        //regular URL-API route
         const response = await fetch("/api/download", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -63,7 +63,10 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playlist }),
+        body: JSON.stringify({ 
+          playlist,
+          customPrompt: customPrompt || null
+        }),
       });
 
       const data = await response.json();
@@ -73,7 +76,7 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
       }
 
       setImageUrl(data.imageUrl);
-      setPrompt(data.prompt); 
+      setPrompt(data.prompt);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -86,6 +89,24 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">Generate AI Cover</h3>
 
+        <div className="space-y-2">
+          <Label htmlFor="custom-prompt" className="text-gray-300">
+            Custom Prompt (Optional)
+          </Label>
+          <Textarea
+            id="custom-prompt"
+            placeholder="Describe your desired cover art style, mood, colors, or themes. Leave empty to auto-generate based on playlist songs."
+            value={customPrompt}
+onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCustomPrompt(e.target.value)}
+            rows={3}
+            disabled={loading}
+            className="resize-none bg-gray-800/50 border-gray-700 text-white placeholder:text-gray-500"
+          />
+          <p className="text-xs text-gray-500">
+            💡 Leave blank to automatically generate based on songs and artists
+          </p>
+        </div>
+
         {!imageUrl ? (
           <Button
             onClick={generateCover}
@@ -93,7 +114,14 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
             className="w-full"
             size="lg"
           >
-            {loading ? "Generating..." : "Generate Cover"}
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              "Generate Cover"
+            )}
           </Button>
         ) : (
           <>
@@ -106,15 +134,14 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
               />
             </div>
 
-            {}
             {prompt && (
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-muted-foreground">
+                <h4 className="text-sm font-semibold text-gray-400">
                   AI Prompt Used:
                 </h4>
-                <p className="text-sm p-3 bg-secondary rounded-md text-muted-foreground">
+                <div className="text-sm p-3 bg-gray-800/50 rounded-md text-gray-300 max-h-32 overflow-y-auto">
                   {prompt}
-                </p>
+                </div>
               </div>
             )}
 
@@ -130,7 +157,7 @@ export default function CoverGenerator({ playlist }: CoverGeneratorProps) {
                 onClick={generateCover}
                 disabled={loading}
                 variant="outline"
-                className="flex-1"
+                className="flex-1 border-gray-700 text-gray-300"
                 size="lg"
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

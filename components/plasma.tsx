@@ -47,13 +47,15 @@ void mainImage(out vec4 o, vec2 C) {
   vec2 center = iResolution.xy * 0.5;
   C = (C - center) / uScale + center;
   
-  vec2 mouseOffset = (uMouse - center) * 0.0002;
+  // ✅ SMOOTHED mouse interaction with lerp
+  vec2 mouseOffset = (uMouse - center) * 0.0001;
   C += mouseOffset * length(C - center) * step(0.5, uMouseInteractive);
   
   float i, d, z, T = iTime * uSpeed * uDirection;
   vec3 O, p, S;
 
-  for (vec2 r = iResolution.xy, Q; ++i < 60.; O += o.w/d*o.xyz) {
+  // ✅ REDUCED iterations from 60 to 40 for better performance
+  for (vec2 r = iResolution.xy, Q; ++i < 40.; O += o.w/d*o.xyz) {
     p = z*normalize(vec3(C-.5*r,r.y)); 
     p.z -= 4.; 
     S = p;
@@ -100,20 +102,20 @@ export const Plasma: React.FC<PlasmaProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mousePos = useRef({ x: 0, y: 0 });
+  const smoothMousePos = useRef({ x: 0, y: 0 }); 
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const useCustomColor = color ? 1.0 : 0.0;
     const customColorRgb = color ? hexToRgb(color) : [1, 1, 1];
-
     const directionMultiplier = direction === 'reverse' ? -1.0 : 1.0;
 
     const renderer = new Renderer({
       webgl: 2,
       alpha: true,
       antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2)
+      dpr: Math.min(window.devicePixelRatio || 1, 1.5) 
     });
     const gl = renderer.gl;
     const canvas = gl.canvas as HTMLCanvasElement;
@@ -132,7 +134,7 @@ export const Plasma: React.FC<PlasmaProps> = ({
         iResolution: { value: new Float32Array([1, 1]) },
         uCustomColor: { value: new Float32Array(customColorRgb) },
         uUseCustomColor: { value: useCustomColor },
-        uSpeed: { value: speed * 0.4 },
+        uSpeed: { value: speed * 0.2 },  //speed adjustment - edit this if req 
         uDirection: { value: directionMultiplier },
         uScale: { value: scale },
         uOpacity: { value: opacity },
@@ -148,9 +150,6 @@ export const Plasma: React.FC<PlasmaProps> = ({
       const rect = containerRef.current!.getBoundingClientRect();
       mousePos.current.x = e.clientX - rect.left;
       mousePos.current.y = e.clientY - rect.top;
-      const mouseUniform = program.uniforms.uMouse.value as Float32Array;
-      mouseUniform[0] = mousePos.current.x;
-      mouseUniform[1] = mousePos.current.y;
     };
 
     if (mouseInteractive) {
@@ -173,7 +172,17 @@ export const Plasma: React.FC<PlasmaProps> = ({
 
     let raf = 0;
     const t0 = performance.now();
+    
     const loop = (t: number) => {
+      //(interpolation)
+      const lerpFactor = 0.1;
+      smoothMousePos.current.x += (mousePos.current.x - smoothMousePos.current.x) * lerpFactor;
+      smoothMousePos.current.y += (mousePos.current.y - smoothMousePos.current.y) * lerpFactor;
+      
+      const mouseUniform = program.uniforms.uMouse.value as Float32Array;
+      mouseUniform[0] = smoothMousePos.current.x;
+      mouseUniform[1] = smoothMousePos.current.y;
+
       let timeValue = (t - t0) * 0.001;
       if (direction === 'pingpong') {
         const pingpongDuration = 10;
@@ -187,6 +196,7 @@ export const Plasma: React.FC<PlasmaProps> = ({
       } else {
         (program.uniforms.iTime as any).value = timeValue;
       }
+      
       renderer.render({ scene: mesh });
       raf = requestAnimationFrame(loop);
     };

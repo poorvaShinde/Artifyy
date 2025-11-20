@@ -15,11 +15,8 @@ export async function POST(request: NextRequest) {
 
     const { imageUrl, playlistName } = await request.json();
 
-    // Fetch the image
     const imageResponse = await fetch(imageUrl);
     const imageBuffer = await imageResponse.arrayBuffer();
-
-    // Create filename
     const filename = `${playlistName.replace(/[^a-z0-9]/gi, "_")}_cover.png`;
 
     return new NextResponse(imageBuffer, {
